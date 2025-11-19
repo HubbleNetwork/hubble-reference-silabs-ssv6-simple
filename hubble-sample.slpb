@@ -1,0 +1,7 @@
+---
+parameters:
+- name: "build_dir"
+constants:
+- name: "project_name"
+  value: "hubble-sample"
+steps: []

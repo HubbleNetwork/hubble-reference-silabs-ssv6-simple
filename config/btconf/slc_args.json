@@ -1,0 +1,6 @@
+{
+  "sdkRoot" : "/Users/paulbuckley/.silabs/slt/installs/conan/p/simpleb526998f4a4d/p/",
+  "apackRoot" : "/Users/paulbuckley/.silabs/slt/installs/conan/p/simpleb526998f4a4d/p/protocol/bluetooth/bin/gatt",
+  "partOpn" : "efr32bg22c224f512im40",
+  "boards" : "brd4108arevA03"
+}
