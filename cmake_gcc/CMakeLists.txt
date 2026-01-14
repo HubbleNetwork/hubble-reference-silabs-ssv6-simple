@@ -17,6 +17,7 @@ include(hubble-sample.cmake)
 add_executable(hubble-sample
     "${HUBBLE_SDK_PATH}/src/hubble_ble.c"
     "${HUBBLE_SDK_PATH}/src/crypto/psa.c"
+    "${HUBBLE_SDK_PATH}/src/hubble.c"
     # Add additional sources here
 )
 
