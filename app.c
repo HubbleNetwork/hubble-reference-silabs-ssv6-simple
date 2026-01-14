@@ -2,6 +2,7 @@
 #include <em_chip.h>
 #include <em_emu.h>
 #include <hubble/ble.h>
+#include <hubble/hubble.h>
 #include "sl_bt_api.h"
 #include "sl_sleeptimer.h"
 #include "sl_main_init.h"
@@ -140,7 +141,7 @@ void app_init(void)
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
   /////////////////////////////////////////////////////////////////////////////
-  hubble_ble_init(utc_time_ms, master_key);
+  hubble_init(utc_time_ms, master_key);
 }
 
 // Application Process Action.
