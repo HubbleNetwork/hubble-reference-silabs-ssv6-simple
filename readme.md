@@ -101,6 +101,88 @@ commander-cli device info          # Show connected device info
 commander-cli device masserase     # Erase the entire main flash
 ```
 
+## Porting the Hubble SDK to Silicon Labs
+
+This project serves as a reference for porting the Hubble Device SDK to any Silicon Labs platform. The SDK requires three things from your platform: a set of **source files**, **compile definitions**, and **platform port functions**.
+
+### 1. Add SDK Source Files
+
+Add the following Hubble SDK source files to your build. In CMake:
+
+```cmake
+add_executable(your-app
+    "${HUBBLE_SDK_PATH}/src/hubble.c"          # Core SDK logic
+    "${HUBBLE_SDK_PATH}/src/hubble_ble.c"      # BLE advertisement generation
+    "${HUBBLE_SDK_PATH}/src/hubble_crypto.c"   # Key derivation and encryption
+    "${HUBBLE_SDK_PATH}/src/crypto/psa.c"      # Crypto backend (PSA API — used by Silicon Labs)
+)
+
+include_directories(your-app
+    "${HUBBLE_SDK_PATH}/include"
+    "${HUBBLE_SDK_PATH}/src"
+)
+```
+
+The SDK ships two crypto backends: `crypto/psa.c` (PSA Crypto API, recommended for Silicon Labs) and `crypto/mbedtls.c` (raw Mbed TLS). Choose the one that matches your platform.
+
+### 2. Set Compile Definitions
+
+The SDK is configured via compile-time definitions:
+
+```cmake
+target_compile_definitions(your-app PUBLIC
+    CONFIG_HUBBLE_KEY_SIZE=32                       # Key size: 32 (256-bit) or 16 (128-bit)
+    CONFIG_HUBBLE_BLE_NETWORK=1                     # Enable BLE network module
+    CONFIG_HUBBLE_BLE_NETWORK_TIMER_COUNTER_DAILY   # Daily timer counter frequency
+    CONFIG_HUBBLE_EID_ROTATION_PERIOD_SEC=86400      # EID rotation period (86400 = 24 hours)
+    CONFIG_HUBBLE_COUNTER_SOURCE_DEVICE_UPTIME=1    # Use device uptime (omit for unix time)
+)
+```
+
+### 3. Implement Platform Port Functions
+
+The SDK requires your platform to implement the functions declared in `hubble/port/sys.h` and `hubble/port/crypto.h`. See [`hubble_port.c`](hubble_port.c) for the Silicon Labs implementation.
+
+**System functions** (`hubble/port/sys.h`):
+
+| Function | Purpose |
+|----------|---------|
+| `hubble_uptime_get()` | Return device uptime in milliseconds |
+| `hubble_log()` | Log a formatted message at a given severity level |
+
+**Crypto functions** (`hubble/port/crypto.h`) — already provided by the SDK's `crypto/psa.c` or `crypto/mbedtls.c` backends:
+
+| Function | Purpose |
+|----------|---------|
+| `hubble_crypto_init()` | Initialize the crypto subsystem |
+| `hubble_crypto_aes_ctr()` | AES-CTR encryption |
+| `hubble_crypto_cmac()` | AES-CMAC computation |
+| `hubble_crypto_zeroize()` | Securely zero a memory buffer |
+
+### 4. Initialize and Use the SDK
+
+In your application startup:
+
+```c
+#include <hubble/hubble.h>
+#include <hubble/ble.h>
+
+// Initialize with device uptime counter (pass 0)
+// Or pass current UTC milliseconds for unix time mode
+hubble_init(0, master_key);
+```
+
+To generate an advertisement:
+
+```c
+uint8_t out[HUBBLE_BLE_ADV_HEADER_SIZE + HUBBLE_BLE_MAX_DATA_LEN];
+size_t out_len = sizeof(out);
+
+int err = hubble_ble_advertise_get(payload, payload_len, out, &out_len);
+```
+
+The returned data should be placed in a BLE Service Data (0x16) advertisement field with the Hubble UUID (0xFCA6) in the Complete List of 16-bit Service UUIDs (0x03). See `app.c` for a complete example of constructing the advertisement packet and managing periodic rotation.
+
 ## Project Structure
 
 ```
