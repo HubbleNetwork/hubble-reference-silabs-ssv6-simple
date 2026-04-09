@@ -41,15 +41,17 @@ static uint8_t master_key[32] = {}; // YOUR KEY HERE
 // indicate work here.
 static volatile bool process_adv_rotation_flag = false;
 
+static const uint8_t hubble_payload[] = "Hello world";
+
 void hubble_ble_adv_update(void) {
   sl_status_t sc = sl_bt_advertiser_stop(advertising_set_handle);
   app_assert_status(sc);
-  
+
 	size_t len = sizeof(adv_data) - HUBBLE_BLE_ADV_HEADER_SIZE;
 
   int status = hubble_ble_advertise_get(
-    NULL, 
-    0,
+    hubble_payload,
+    sizeof(hubble_payload) - 1,
     &adv_data[HUBBLE_BLE_ADV_HEADER_SIZE],
     &len);
   adv_data[4] = len + 1;
