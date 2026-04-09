@@ -34,10 +34,8 @@ static uint8_t adv_data[BLE_ADV_LEN] = {
   HUBBLE_BLE_ADV_HEADER
 };
 
-// You must set these per the current time and your key - update the key length if
-// using a 128b key
+// Must match CONFIG_HUBBLE_KEY_SIZE in CMakeLists.txt (32 = 256-bit, 16 = 128-bit)
 static uint8_t master_key[32] = {}; // YOUR KEY HERE
-static uint64_t utc_time_ms = 1; // NEED TO SET
 
 // Stopping/starting BLE must be done in the main loop so use a flag to
 // indicate work here.
@@ -141,7 +139,9 @@ void app_init(void)
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
   /////////////////////////////////////////////////////////////////////////////
-  hubble_init(utc_time_ms, master_key);
+  // Using device uptime as the counter source — 0 starts the counter at
+  // epoch 0. The SDK tracks time from device boot via hubble_uptime_get().
+  hubble_init(0, master_key);
 }
 
 // Application Process Action.

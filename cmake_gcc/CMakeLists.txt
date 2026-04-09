@@ -15,9 +15,10 @@ project(
 include(hubble-sample.cmake)
 
 add_executable(hubble-sample
-    "${HUBBLE_SDK_PATH}/src/hubble_ble.c"
-    "${HUBBLE_SDK_PATH}/src/crypto/psa.c"
     "${HUBBLE_SDK_PATH}/src/hubble.c"
+    "${HUBBLE_SDK_PATH}/src/hubble_ble.c"
+    "${HUBBLE_SDK_PATH}/src/hubble_crypto.c"
+    "${HUBBLE_SDK_PATH}/src/crypto/psa.c"
     # Add additional sources here
 )
 
@@ -33,7 +34,10 @@ target_include_directories(hubble-sample PUBLIC
 
 target_compile_definitions(hubble-sample PUBLIC
     CONFIG_HUBBLE_KEY_SIZE=32
+    CONFIG_HUBBLE_BLE_NETWORK=1
     CONFIG_HUBBLE_BLE_NETWORK_TIMER_COUNTER_DAILY
+    CONFIG_HUBBLE_EID_ROTATION_PERIOD_SEC=86400
+    CONFIG_HUBBLE_COUNTER_SOURCE_DEVICE_UPTIME=1
 )
 
 target_compile_options(hubble-sample PUBLIC
